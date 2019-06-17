@@ -12,8 +12,8 @@ This shell tool assumes that you keep all your repositories in a common director
 Before using zapsh for the first time, you need to set it up, **which is a few liner**:
 
 ```bash
-export WORK_DIRECTORY=/path/to/zapsh
-source ${WORK_DIRECTORY}/zapsh.sh
+export WORK_DIRECTORY=/path/to/all/git/repositories
+source ${WORK_DIRECTORY}/zapsh/zapsh.sh
 ```
 
 Add the above line either in your `~/.bashrc` or `~/.zshrc` file and reload it by `source ~/.bashrc` or `source ~/.zshrc` or open a new 
