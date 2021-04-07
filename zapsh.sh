@@ -19,8 +19,9 @@ export PATH="$ZAPSH_DIRECTORY/scripts:$PATH"
 
 aliasFiles=(angular android cordova-ionic firebase git gradle grails linux mongodb mysql nginx npm react tomcat unix-network utils)
 
-for i in ${aliasFiles}; do
-    . ${ZAPSH_DIRECTORY}/aliases/${i}.sh
+for i in "${aliasFiles[@]}"; do
+	echo $i
+    . ${ZAPSH_DIRECTORY}/aliases/"$i".sh
 done
 
 if [[ "$(uname)" == "Darwin" ]]; then
