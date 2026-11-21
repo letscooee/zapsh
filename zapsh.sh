@@ -17,16 +17,16 @@ export PATH="$ZAPSH_DIRECTORY/scripts:$PATH"
 
 # Register all aliases
 
-aliasFiles=(angular android cordova-ionic ide firebase git gradle grails linux mongodb mysql nest nginx npm react
-tomcat unix-network utils aws)
+aliasFiles=(angular android cordova-ionic ide firebase git gradle grails linux mongodb mysql nest nginx npm react tomcat unix-network utils aws)
 
 for i in "${aliasFiles[@]}"; do
-    . ${ZAPSH_DIRECTORY}/aliases/"$i".sh
+    [[ -n "$i" ]] && . ${ZAPSH_DIRECTORY}/aliases/"$i".sh
 done
 
 # Print all aliases
 export function all() {
     for i in "${aliasFiles[@]}"; do
+        [[ -z "$i" ]] && continue
         echo -e "\n${GREEN}${i} aliases${NONE}"
         # Install https://github.com/sharkdp/bat
         bat --paging=never ${ZAPSH_DIRECTORY}/aliases/"$i".sh
