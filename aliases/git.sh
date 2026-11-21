@@ -3,8 +3,8 @@
 # Use base from https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git#aliases
 
 # Branch/tag/commit related
-## Reset all changes including the untracked changes
-alias gr='git reset --hard && git clean -fd'
+## Reset all changes including the untracked changes (keeps .claude/ folders)
+alias gr='git reset --hard && git clean -fd -e .claude/'
 ## Delete last commit
 alias gdc='git reset --soft HEAD~1'
 

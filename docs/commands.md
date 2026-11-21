@@ -73,11 +73,13 @@ grepoclean
 
 Runs, in order, stopping at the first failure:
 
-1. `gr`: `git reset --hard && git clean -fd`, discarding uncommitted changes and untracked files and folders
+1. `gr`: `git reset --hard && git clean -fd -e .claude/`, discarding uncommitted changes and untracked files and
+   folders, except anything under a `.claude/` folder
 2. `gdelrbr`: `git remote prune origin`, removing remote-tracking refs for branches deleted on `origin`
 3. `gbprune`: deleting local branches merged into `main` and their clean worktrees
 
-Files ignored by `.gitignore` (such as `node_modules` and build output) are kept.
+Kept: files ignored by `.gitignore` (such as `node_modules` and build output), anything under `.claude/`, and other
+worktrees, which `git clean` treats as separate repositories.
 
 ## `gpush` / `gpull`: push or pull the current branch
 
