@@ -1,6 +1,7 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+set -e
 
-cd ${DB_BACKUP_DIRECTORY}
+mkdir -p "$DB_BACKUP_DIRECTORY" && cd "$DB_BACKUP_DIRECTORY"
 
 dumpFileName="$1-$(date +%F_%R).sql"
 

@@ -27,7 +27,7 @@ alias gta='git tag -a'
 #alias gts='git tag --sort=creatordate'
 alias gts='git for-each-ref --format="%(color:bold yellow)%(refname:short) %(color:bold blue)%(creatordate) %(color:bold red)%(*authorname)" refs/tags'
 ## Delete a tag locally and from remote if available
-alias gtd='$ZAPSH_DIRECTORY/private-scripts/git-delete-tag.sh'
+alias gtd='$ZAPSH_DIR/libexec/git-delete-tag.sh'
 
 # Branch related
 alias gb='git branch'
@@ -37,11 +37,11 @@ alias gbD='deleteBranch() { gb -D "$1" || true && gb -Dr origin/"$1" }; deleteBr
 ## Delete all local branches that are merged
 alias gdelbr='git branch --merged | egrep -v "(^\*|master|main|dev)" | xargs git branch -D'
 ## Checkout to a new branch/tag (pull the branch/tag from remote if not available)
-alias gc='$ZAPSH_DIRECTORY/private-scripts/git-checkout.sh'
+alias gc='$ZAPSH_DIR/libexec/git-checkout.sh'
 
 # Remote operation related
-alias gpush='$ZAPSH_DIRECTORY/private-scripts/git-push-pull.sh push'
-alias gpull='$ZAPSH_DIRECTORY/private-scripts/git-push-pull.sh pull'
+alias gpush='$ZAPSH_DIR/libexec/git-push-pull.sh push'
+alias gpull='$ZAPSH_DIR/libexec/git-push-pull.sh pull'
 alias gpta='git push --tags'
 alias gremotes='git remote -v'
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
 set -e
 
 # Handy script to auto use the Grails 3 version based on what is defined in the "gradle.properties". This script uses
