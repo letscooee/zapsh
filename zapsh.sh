@@ -11,7 +11,8 @@ export UNDERLINE='\033[4m'
 
 # Do necessary changes
 
-export ZAPSH_DIRECTORY=${WORK_DIRECTORY}/zapsh
+# Resolve from this file's location so the clone folder can have any name (bash: BASH_SOURCE, zsh: %x)
+export ZAPSH_DIRECTORY=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")" && pwd)
 export DB_BACKUP_DIRECTORY=${WORK_DIRECTORY}/database-backups
 export PATH="$ZAPSH_DIRECTORY/scripts:$PATH"
 
