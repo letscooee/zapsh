@@ -36,3 +36,36 @@ all() {
     done
     echo -e "\n${GREEN}https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/README.md${NONE}"
 }
+
+# zapsh version | update | uninstall
+zapsh() {
+    case "$1" in
+        version)
+            git -C "$ZAPSH_DIR" describe --tags --always
+            ;;
+        update)
+            git -C "$ZAPSH_DIR" pull --ff-only --quiet && . "$ZAPSH_DIR/zapsh.sh" &&
+                echo "zapsh updated to $(zapsh version)"
+            ;;
+        uninstall)
+            [[ -f "$ZAPSH_DIR/zapsh.sh" ]] || { echo "zapsh: $ZAPSH_DIR doesn't look like a zapsh install" >&2; return 1; }
+            printf 'Delete %s and remove zapsh from your shell rc files? [y/N] ' "$ZAPSH_DIR"
+            local reply rc
+            read -r reply
+            [[ $reply == [yY]* ]] || return 1
+            for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
+                grep -qs 'zapsh\.sh' "$rc" || continue
+                # Rewrite in place (cat >) so a symlinked rc file stays a symlink
+                grep -vE '^# zapsh$|zapsh\.sh' "$rc" > "$rc.zapsh-tmp"
+                cat "$rc.zapsh-tmp" > "$rc" && rm "$rc.zapsh-tmp"
+                echo "Removed zapsh from $rc"
+            done
+            rm -rf "$ZAPSH_DIR"
+            echo "zapsh uninstalled. If you use the oh-my-zsh plugin, remove zapsh from plugins=(...). Open a new terminal to finish."
+            ;;
+        *)
+            echo "Usage: zapsh version | update | uninstall"
+            [[ -z "$1" ]]
+            ;;
+    esac
+}

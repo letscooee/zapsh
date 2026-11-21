@@ -14,7 +14,7 @@ if [[ -d "$ZAPSH_DIR/.git" ]]; then
     git -C "$ZAPSH_DIR" pull --ff-only --quiet
 else
     echo "Installing zapsh into $ZAPSH_DIR"
-    git clone --depth 1 --quiet "$ZAPSH_REPO" "$ZAPSH_DIR"
+    git clone --quiet "$ZAPSH_REPO" "$ZAPSH_DIR"
 fi
 
 case "$(basename "${SHELL:-}")" in

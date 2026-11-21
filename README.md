@@ -12,7 +12,13 @@ curl -fsSL https://raw.githubusercontent.com/letscooee/zapsh/main/install.sh | b
 ```
 
 This clones zapsh into `~/.zapsh` and adds one `source` line to your `~/.zshrc` or `~/.bashrc`. Open a new terminal and run
-`all` to list every alias. Run the same command again to update.
+`all` to list every alias.
+
+```bash
+zapsh version     # installed version
+zapsh update      # pull the latest and reload
+zapsh uninstall   # remove zapsh and its rc line
+```
 
 To install somewhere else, set `ZAPSH_DIR`:
 
@@ -44,6 +50,7 @@ Set `WORK_DIRECTORY` to the folder holding all your git repositories. Database d
 | `zapsh.sh` | Entry point you source from your shell rc |
 | `zapsh.plugin.zsh` | Entry point for oh-my-zsh and other zsh plugin managers |
 | `install.sh` | The curl installer |
+| `CHANGELOG.md` | Release notes for each version |
 | `aliases/` | One file of aliases per tool, all loaded automatically (`mac.sh` only on macOS) |
 | `bin/` | Commands added to your `PATH` |
 | `libexec/` | Helper scripts called by aliases, not meant to be run directly |
