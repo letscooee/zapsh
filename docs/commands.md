@@ -63,6 +63,22 @@ gbprune develop   # delete branches merged into develop
 Unlike oh-my-zsh's `gbda` and `gbds`, it handles both kinds of merge in one pass and doesn't stop at branches checked
 out in worktrees.
 
+## `grepoclean`: reset the repository to a clean state
+
+```bash
+grepoclean
+```
+
+> **Destructive.** Uncommitted changes and untracked files are deleted and can't be recovered. Commit or stash first.
+
+Runs, in order, stopping at the first failure:
+
+1. `gr`: `git reset --hard && git clean -fd`, discarding uncommitted changes and untracked files and folders
+2. `gdelrbr`: `git remote prune origin`, removing remote-tracking refs for branches deleted on `origin`
+3. `gbprune`: deleting local branches merged into `main` and their clean worktrees
+
+Files ignored by `.gitignore` (such as `node_modules` and build output) are kept.
+
 ## `gpush` / `gpull`: push or pull the current branch
 
 ```bash

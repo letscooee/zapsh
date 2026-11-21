@@ -16,10 +16,10 @@ alias gdel='git push origin --delete'
 alias gsu='git submodule update --init'
 
 # Cleaning related
-alias gclean='git clean -fd'
+#alias gclean='git clean -fd'
 alias gdelrbr='git remote prune origin'
-## Clean everything - merged branches, untracked files, unstashed changes, merged remote branches
-alias grepoclean='gr && gclean && gdelrbr'
+## Clean everything - uncommitted changes, untracked files, stale remote refs, merged branches and their worktrees
+alias grepoclean='gr && gdelrbr && gbprune'
 
 # Tag related
 alias gt='git tag'
