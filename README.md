@@ -54,8 +54,9 @@ Set `WORK_DIRECTORY` to the folder holding all your git repositories. Database d
 | `aliases/` | One file of aliases per tool, all loaded automatically (`mac.sh` only on macOS) |
 | `bin/` | Commands added to your `PATH` |
 | `libexec/` | Helper scripts called by aliases, not meant to be run directly |
+| `docs/` | Usage docs for the commands |
 
-Run `all` to print every alias.
+Run `all` to print every alias. See [docs/commands.md](docs/commands.md) for the commands that do more than one thing (`gc`, `gpush`, `sqld` and others).
 
 ## Releasing
 
