@@ -56,3 +56,10 @@ Set `WORK_DIRECTORY` to the folder holding all your git repositories. Database d
 | `libexec/` | Helper scripts called by aliases, not meant to be run directly |
 
 Run `all` to print every alias.
+
+## Releasing
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Write commit messages as
+[Conventional Commits](https://www.conventionalcommits.org/): `fix:` bumps the patch version, `feat:` the minor version,
+and `feat!:` or a `BREAKING CHANGE:` footer the major version. release-please keeps a release PR open with the next
+version and its `CHANGELOG.md` entry; merging it tags the release and publishes it on GitHub.
