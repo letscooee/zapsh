@@ -15,5 +15,8 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
+          # The org ruleset blocks tag creation by the built-in token; this token's owner must be allowed to create tags.
+          # Falls back to the built-in token, which can open release PRs but not publish releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json

@@ -64,3 +64,7 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 [Conventional Commits](https://www.conventionalcommits.org/): `fix:` bumps the patch version, `feat:` the minor version,
 and `feat!:` or a `BREAKING CHANGE:` footer the major version. release-please keeps a release PR open with the next
 version and its `CHANGELOG.md` entry; merging it tags the release and publishes it on GitHub.
+
+The workflow publishes releases with a `RELEASE_PLEASE_TOKEN` repository secret, because the organization's rules stop
+the built-in Actions token from creating tags. Use a fine-grained personal access token scoped to this repository with
+**Contents** and **Pull requests** set to read and write, owned by someone the tag rule lets through.
