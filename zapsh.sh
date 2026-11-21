@@ -24,7 +24,7 @@ for i in "${aliasFiles[@]}"; do
 done
 
 # Print all aliases
-export function all() {
+all() {
     for i in "${aliasFiles[@]}"; do
         [[ -z "$i" ]] && continue
         echo -e "\n${GREEN}${i} aliases${NONE}"
