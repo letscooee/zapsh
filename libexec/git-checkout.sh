@@ -1,104 +1,106 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+# Check out a branch or tag, fetching from the remote when it isn't known locally.
+# If the branch is already checked out in another worktree, report that worktree's path instead.
+#
+# Usage: gc [-f|--force] <branch-or-tag> [remote]
+#   -f, --force  Delete the local branch and its remote-tracking ref, then fetch it fresh
+#
+# The path of a worktree to switch to is written to fd 3 when it is open (the gc shell function cds there).
+set -eo pipefail
 
-BRANCH_OR_TAG=""
-REMOTE_NAME=origin
-GIT_FETCH_ONCE_DONE=false
-FORCE_FLAG=false
+usage() { echo "Usage: gc [-f|--force] <branch-or-tag> [remote]"; }
+info() { echo -e "${BLUE:-}$*${NONE:-}"; }
+fail() { echo -e "${RED:-}$*${NONE:-}" >&2; exit 1; }
 
-# Parse arguments
+name=""
+remote=origin
+force=false
+fetched=false
+
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -f|--force)
-            FORCE_FLAG=true
-            shift
-            ;;
-        *)
-            if [[ -z "$BRANCH_OR_TAG" ]]; then
-                BRANCH_OR_TAG=$1
-            else
-                REMOTE_NAME=$1
-            fi
-            shift
-            ;;
+        -f|--force) force=true ;;
+        -h|--help) usage; exit 0 ;;
+        -*) usage >&2; exit 1 ;;
+        *) if [[ -z $name ]]; then name=$1; else remote=$1; fi ;;
     esac
+    shift
 done
 
-if [[ ! ${BRANCH_OR_TAG} ]]; then
-    echo -e "${RED}First argument missing i.e. tag or branch name ${NONE}"
-    exit 1
+[[ -n $name ]] || { usage >&2; exit 1; }
+git rev-parse --git-dir >/dev/null 2>&1 || fail "Not inside a git repository"
+
+fetch() {
+    info "Fetching from [$remote]..."
+    git fetch --quiet --tags "$remote"
+    fetched=true
+}
+
+# Path of the worktree that has branch $1 checked out, if any
+worktree_of() {
+    git worktree list --porcelain | awk -v ref="refs/heads/$1" '
+        /^worktree / { path = substr($0, 10) }
+        $0 == "branch " ref { print path; exit }'
+}
+
+here=$(git rev-parse --show-toplevel)
+worktree=$(worktree_of "$name")
+
+if [[ $force == true ]]; then
+    echo -e "${YELLOW:-}Force flag set. Cleaning up existing references for [$name]...${NONE:-}"
+
+    if [[ -n $worktree && $worktree != "$here" ]]; then
+        fail "[$name] is checked out in worktree $worktree. Remove it first: git worktree remove \"$worktree\""
+    fi
+
+    if [[ $(git branch --show-current) == "$name" ]]; then
+        info "Currently on [$name]. Switching to main/master first..."
+        git checkout --quiet main 2>/dev/null || git checkout --quiet master 2>/dev/null ||
+            fail "Cannot switch away from [$name]. Check out a different branch first."
+    fi
+
+    if git show-ref --quiet --verify "refs/heads/$name"; then
+        info "Deleting local branch [$name]..."
+        git branch --quiet -D "$name"
+    fi
+
+    if git show-ref --quiet --verify "refs/remotes/$remote/$name"; then
+        info "Deleting remote-tracking ref [$remote/$name]..."
+        git branch --quiet -rd "$remote/$name"
+    fi
+
+    fetch
+    worktree=""
 fi
 
-# Handle force flag - delete local branch and remote reference
-if [[ ${FORCE_FLAG} == true ]]; then
-    echo -e "${YELLOW}Force flag detected. Cleaning up existing references...${NONE}"
-
-    # Check if currently on the branch we want to delete
-    currentBranch=$(git branch --show-current)
-    if [[ "$currentBranch" == "$BRANCH_OR_TAG" ]]; then
-        echo -e "${BLUE}Currently on branch [$BRANCH_OR_TAG]. Switching to main/master first...${NONE}"
-        git checkout main 2>/dev/null || git checkout master 2>/dev/null || {
-            echo -e "${RED}Cannot switch away from current branch. Please checkout to a different branch first.${NONE}"
-            exit 1
-        }
+# Branch already checked out in another worktree: git can't check it out here, so point there instead
+if [[ -n $worktree ]]; then
+    if [[ $worktree == "$here" ]]; then
+        info "Already on [$name]"
+    else
+        echo -e "${GREEN:-}[$name] is checked out in worktree: $worktree${NONE:-}"
+        { echo "$worktree" >&3; } 2>/dev/null || echo "cd \"$worktree\""
     fi
-
-    # Delete local branch if it exists
-    localReference=$(git rev-parse -q --verify ${BRANCH_OR_TAG}) || true
-    if [[ "$localReference" != "" ]]; then
-        echo -e "${BLUE}Deleting local branch [$BRANCH_OR_TAG]...${NONE}"
-        git branch -D ${BRANCH_OR_TAG} || true
-    fi
-
-    # Delete remote tracking reference if it exists
-    remoteRef=$(git show-ref refs/remotes/${REMOTE_NAME}/${BRANCH_OR_TAG}) || true
-    if [[ "$remoteRef" != "" ]]; then
-        echo -e "${BLUE}Deleting remote tracking reference [${REMOTE_NAME}/${BRANCH_OR_TAG}]...${NONE}"
-        git branch -rd ${REMOTE_NAME}/${BRANCH_OR_TAG} || true
-    fi
-
-    # Fetch fresh from remote
-    echo -e "${BLUE}Fetching fresh from remote [$REMOTE_NAME]...${NONE}"
-    git fetch ${REMOTE_NAME}
-    GIT_FETCH_ONCE_DONE=true
+    exit 0
 fi
 
-localReference=$(git rev-parse -q --verify ${BRANCH_OR_TAG}) || true
+has_local() { git rev-parse --quiet --verify "$name^{commit}" >/dev/null; }
+has_remote() { git show-ref --quiet --verify "refs/remotes/$remote/$name"; }
 
-# If there is no local specified branch or tag present
-if [[ "$localReference" == "" ]]; then
-    # Using a while loop here which will run only maximum of 2 times. First time it will check that if we have the local
-    # reference of the remote branch. If the repository does not have local reference of remote branch then it will fetch
-    # it from the remote and the next loop iteration will again check for the same condition.
-    while true; do
-        localRemoteReference=$(git show-ref ${BRANCH_OR_TAG}) || true
+if ! has_local && ! has_remote && [[ $fetched == false ]]; then
+    info "[$name] not found locally"
+    fetch
+fi
 
-        # If remote branch reference does not exists
-        if [[ "$localRemoteReference" == "" ]]; then
-            echo -e "${RED}Local branch/tag does not exists with name [$BRANCH_OR_TAG]${NONE}"
-
-            # Check if we have already done the "git fetch" and branch still doesn't exists (prevents infinite loop)
-            if [[ ${GIT_FETCH_ONCE_DONE} == false ]]; then
-                echo -e "${BLUE}Pulling from the remote [$REMOTE_NAME]${NONE}"
-                GIT_FETCH_ONCE_DONE=true
-                git fetch ${REMOTE_NAME}
-            else
-                echo -e "${RED}No branch/tag found with name [$BRANCH_OR_TAG]${NONE}"
-                exit 1
-            fi
-        else
-            # If specified name is a tag
-            if [[ ${localRemoteReference} == *"/tags/"* ]]; then
-                echo -e "${BLUE}Found local tag. Checking out to [$BRANCH_OR_TAG]${NONE}"
-                git checkout ${BRANCH_OR_TAG}
-            else
-                echo -e "${BLUE}Found local remote reference of branch. Checking out to [$BRANCH_OR_TAG]${NONE}"
-                # Create and git-checkout.sh to the new local branch from the local reference of the remote branch
-                git checkout -b ${BRANCH_OR_TAG} ${REMOTE_NAME}/${BRANCH_OR_TAG}
-            fi
-            break
-        fi
-    done
+if git show-ref --quiet --verify "refs/heads/$name" || git show-ref --quiet --verify "refs/tags/$name"; then
+    echo -e "${GREEN:-}Checking out [$name]${NONE:-}"
+    git checkout "$name"
+elif has_remote; then
+    info "Creating [$name] from [$remote/$name]"
+    git checkout --track -b "$name" "$remote/$name"
+elif has_local; then
+    # A commit SHA or another ref git can resolve
+    git checkout "$name"
 else
-    echo -e "${GREEN}Found branch or tag locally. Checking out to [$BRANCH_OR_TAG]${NONE}"
-    git checkout ${BRANCH_OR_TAG}
+    fail "No branch or tag named [$name] locally or on [$remote]"
 fi

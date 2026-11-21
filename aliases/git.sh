@@ -37,7 +37,13 @@ alias gbD='deleteBranch() { gb -D "$1" || true && gb -Dr origin/"$1" }; deleteBr
 ## Delete all local branches that are merged
 alias gdelbr='git branch --merged | egrep -v "(^\*|master|main|dev)" | xargs git branch -D'
 ## Checkout to a new branch/tag (pull the branch/tag from remote if not available)
-alias gc='$ZAPSH_DIR/libexec/git-checkout.sh'
+# A function, not an alias, so it can cd into a worktree that already has the branch checked out
+unalias gc 2>/dev/null
+gc() {
+    local dir
+    dir=$("$ZAPSH_DIR/libexec/git-checkout.sh" "$@" 3>&1 1>&2) || return
+    [[ -z $dir ]] || cd "$dir"
+}
 
 # Remote operation related
 alias gpush='$ZAPSH_DIR/libexec/git-push-pull.sh push'
