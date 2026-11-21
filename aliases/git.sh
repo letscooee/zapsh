@@ -34,8 +34,8 @@ alias gb='git branch'
 ## Delete the local branch and remote tracking branch (useful when remote branch was rebased)
 # shellcheck disable=SC2142
 alias gbD='deleteBranch() { gb -D "$1" || true && gb -Dr origin/"$1" }; deleteBranch'
-## Delete all local branches that are merged
-alias gdelbr='git branch --merged | egrep -v "(^\*|master|main|dev)" | xargs git branch -D'
+## Delete local branches merged (or squash-merged) into main, removing their clean worktrees
+alias gbprune='$ZAPSH_DIR/libexec/git-prune-merged.sh'
 ## Checkout to a new branch/tag (pull the branch/tag from remote if not available)
 # A function, not an alias, so it can cd into a worktree that already has the branch checked out
 unalias gc 2>/dev/null

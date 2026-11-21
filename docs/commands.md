@@ -35,6 +35,34 @@ gc -f feature/login       # reset to the remote's version
 
 > zapsh's `gc` replaces oh-my-zsh's `gc` (`git commit --verbose`). Use `git commit -v` or another alias for that.
 
+## `gbprune`: delete merged branches, worktrees included
+
+```bash
+gbprune [-n|--dry-run] [base-branch]
+```
+
+Deletes every local branch already merged into the base branch (default `main`, else `master`), whether it was merged
+normally or squash-merged.
+
+- Never touches the base branch, `main`, `master`, `develop`, `dev` or the branch you're on.
+- A merged branch checked out in another worktree has that worktree removed first. If the worktree has uncommitted or
+  untracked changes, the branch is skipped and reported.
+- Unmerged branches are kept and listed with how many of their commits aren't in the base branch.
+- Worktrees whose folders were already deleted are pruned first, so they no longer block branch deletion.
+- `-n`, `--dry-run` lists what would be deleted without changing anything.
+
+```bash
+gbprune -n        # preview
+gbprune           # delete branches merged into main
+gbprune develop   # delete branches merged into develop
+```
+
+> A branch with no commits of its own (for example, one just created for a new worktree) counts as merged. Preview
+> with `-n` if you have fresh worktrees you're about to use.
+
+Unlike oh-my-zsh's `gbda` and `gbds`, it handles both kinds of merge in one pass and doesn't stop at branches checked
+out in worktrees.
+
 ## `gpush` / `gpull`: push or pull the current branch
 
 ```bash
